@@ -1,0 +1,66 @@
+openapi: "3.0.2"
+info:
+  title: "Поиск N-го максимального числа в файле .xlsx"
+  description: >-
+    API для поиска N-го максимального числа в XLSX-файле.<br /><br />
+        Сервис читает XLSX-файл, содержащий столбец с целыми числами, и возвращает N-ое по величине число.<br /><br />
+        Для поиска используется **минимальная куча (`PriorityQueue`)**.<br /><br />
+        Если в файле чисел меньше, чем N, API возвращает ошибку `400 Bad Request`.
+  version: "1.0"
+servers:
+  - url: /api
+    description: Основной API-сервер
+
+paths:
+  /xlsx:
+    get:
+      tags:
+        - XLSX Processing
+      description: >-
+        Читает файл XLSX, содержащий столбец целых чисел, и находит N-ое по величине число.
+      parameters:
+        - name: filePath
+          in: query
+          required: true
+          description: Путь к файлу XLSX на локальной системе
+          schema:
+            type: string
+          example: "/home/user/numbers.xlsx"
+        - name: n
+          in: query
+          required: true
+          description: Какое по величине число искать
+          schema:
+            type: integer
+            minimum: 1
+          example: 3
+      responses:
+        "200":
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 42
+        "400":
+          description: Ошибка запроса (неверные параметры, файл не найден)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Ошибка сервера (например, файл не может быть обработан)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Описание ошибки
+          example: "Файл не найден или не содержит корректные данные"
